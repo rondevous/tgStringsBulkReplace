@@ -1,0 +1,20 @@
+# The replacer can find strings present in another case and replace with the cased version of the replacement string.
+# To enable below options, remove the hash (##) symbol
+
+## @match_lower_case
+## @match_UPPERCASE ==find
+## @match_Title_Case ==replace
+
+# Regex globals for pattern searching
+## @re_global_ASCII
+## @re_global_UNICODE
+## @re_global_IGNORECASE
+## @re_global_DOTALL
+
+
+[find]
+replace
+
+r['regexfind']f,l,a,g,s
+regexreplace
+
