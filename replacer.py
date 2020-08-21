@@ -64,7 +64,7 @@ if(isXML()):
 	root = tree.getroot()	# <Element 'resources'>
 	#
 	if(args.preview):
-		print('\n\nThese replacements will be made:')
+		print('\n\nThese strings have been edited:\n')
 	#
 	strCount=1
 	for string in root.findall('string'):
@@ -94,7 +94,7 @@ if(isXML()):
 			root.remove(string)
 			continue
 		if(args.preview):
-			print('\n'+str(strCount)+'.',string_name)
+			# print('\n'+str(strCount)+'. {'+string_name+'}')
 			print(translation[0])
 		string.text = translation[0]
 		strCount+=1
