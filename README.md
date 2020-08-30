@@ -1,25 +1,36 @@
-# Telegram Translation Strings Replacer
-Rename strings of your Telegram langpack in one go. Only supports XML files. Unicode character-range is supported.
+# Bulk Replacer 
+Rename strings of your Telegram langpack in bulk. All translation apps are supported. Unicode character-range is supported. You can replace latin and non-latin characters present in any language (English, Russian, Hindi, Malayalam, Chinese, etc).
 
-## How to use
+### Setup:
 1. Download and Install [Python 3](https://www.python.org/downloads)
-2. Download the [replacer.py](https://github.com/rondevous/tgStringsBulkReplace/raw/master/replacer.py) script.
-    - When the page loads, `right click > save as` to download it.
-3. Copy the script (replacer.py) and your language.XML file to an empty folder
-4. Edit the script's dictionary with your replacements
-5. Now open the folder in terminal or command prompt 
-    - In Windows: type `cmd.exe` in the folder's address bar. (or using the prompt: `cd path\to\folder`)
-    - In Linux/bash terminal: `cd path/to/folder`
-6. Finally, run the script: `python replacer.py --file language.xml`
+2. Download [replacer.py](https://github.com/rondevous/tgStringsBulkReplace/raw/master/replacer.py)
+_(right click the link > Save link as)_
 
-- If you get stuck: `python replacer.py --help`
+### Preparations:
+1. Export your language from [translations.telegram.org/**langname/appname**](https://translations.telegram.org)
+2. Keep all files in the same folder:
+```
+replacer.py
+language_file
+```
 
-### The script is in early stage of development
-Currently, `replacer.py` only works with XML files.
-Unicode is used to make replacements. That means you can find-replace non-latin characters present in russian, hindi, malayalam, etc
+## Run the replacer:
+1. Open [replacer.py](https://github.com/rondevous/tgStringsBulkReplace/raw/master/replacer.py) in notepad/editor and edit the `"find":"replace"` pairs
+2. [Open command prompt/terminal](https://github.com/rondevous/tgStringsBulkReplace#opening-command-prompt--terminal) and enter this command (do not copy `$`)
+```
+$ python replacer.py --file language.xml
+```
+Tip: Pressing 'Tab' in the terminal will auto-complete the file name.
 
-### Requirements
-- Python3
+**If you get stuck**
+```
+$ python replacer.py --help
+```
 
-### Further help
+### To open command prompt / Terminal
+- In Windows, type `cmd.exe` in the folder's address bar. Or simply open the prompt and enter: `cd path\to\folder`
+- In Linux terminal: `cd path/to/folder`
+
+## More tools and support
 Join us in the [Translation Platform Tools](https://t.me/TranslationTools) group
+
