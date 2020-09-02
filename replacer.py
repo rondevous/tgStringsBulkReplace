@@ -1,11 +1,12 @@
-# EDIT THIS (case-sensitive)
+# EDIT THIS
 replace_dictionary = {
 	"groups":"baskets",
 	"members":"onions",
 	"Forever":"STFU",
 }
-# Remember that lowercase is not UPPERCASE 
-# Please check possibilities.log after running the script
+# Remember: lowercase is not UPPERCASE 
+
+
 
 # DO NOT EDIT THE CODE BELOW (unless you know Python and RegEx)
 
@@ -19,7 +20,7 @@ import argparse
 arg_parser = argparse.ArgumentParser(
 	description='Makes bulk-replacements to your Telegram language file. The find-replace pairs should be edited in replacer.py')
 arg_parser.add_argument(
-	'--file', metavar='Langfile[.xml|.strings]', type=str, required=True,
+	'--lang', metavar='Langfile', type=str, required=True,
 	help='Your language file (.xml or .strings) export from the translations platform')
 # arg_parser.add_argument(
 # 	'-l','--list', metavar='Replace_list.txt', type=str, required=True,
@@ -29,7 +30,7 @@ arg_parser.add_argument(
 	help='Display the replaced translations.')
 
 args = arg_parser.parse_args()
-lang_file = str(args.file)  # str('android_lang_v1234567.xml')
+lang_file = str(args.lang)  # str('android_lang_v1234567.xml')
 print("\n\nUsing File:\n\t"+lang_file)
 
 # log possibilites
