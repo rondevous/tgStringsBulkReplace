@@ -18,10 +18,10 @@ import argparse
 
 # Command-line info and argument parsing
 arg_parser = argparse.ArgumentParser(
-	description='Makes bulk-replacements to your Telegram language file. The find-replace pairs should be edited in replacer.py')
+	description='Make bulk-replacements to your Telegram language. The find:replace pairs should be edited in replacer.py')
 arg_parser.add_argument(
-	'--lang', metavar='Langfile', type=str, required=True,
-	help='Your language file (.xml or .strings) export from the translations platform')
+	'--lang', metavar='langfile.xml', type=str, required=True,
+	help='Your language file (.xml or .strings) exported from the translations platform')
 # arg_parser.add_argument(
 # 	'-l','--list', metavar='Replace_list.txt', type=str, required=True,
 #	help='File containing list of replacements to be make')
