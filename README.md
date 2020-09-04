@@ -7,45 +7,42 @@ The words are replaced across all languages and scripts in the Unicode character
 
 ## Pros:
 - Replaces the whole word (only exact matches)
-- Works offline
+- **Works offline**
 - Finishes in under 2 secs
-
-**Any replacements for the word "admin", will not replace the word "administrator".**<br>
-Likewise, replacements for the word **"use" will not replace the word "house".**
+- **Replacements for the word "admin", will not affect the word "administrator".**
+- Likewise, replacements for the word "use" will not affect the word "house".
 
 ## Cons:
-- **Replacement pairs have to be made inside the code.**
-- **Need to use the Terminal/Command Prompt**
-- Need to install something (Python 3)
+- **Find-Replace pairs have to be made inside the code.**
+- Need to use the Terminal/Command Prompt
+- **Need to install something (Python 3)**
 - Translator has to adjust with the code-y eyes.
 
-### Tips:
-In the "find":"replace" pairs
-- "**members?**" will match both "**member**" and "**members**" <br>
-- "**[Aa]dmin**" will match both "**Admin**" and "**admin**"
+## How to use 'Bulk Replacer'
 
+🔸 **Advice:** _Do not be afraid to open the file and look at the code._<br>
+_Do not be afraid to run the code._
 
-### Setup:
-1. Download and Install **[Python 3](https://www.python.org/downloads)**
-- Windows downloads:<br>
-[Windows 64-bit](https://www.python.org/ftp/python/3.8.5/python-3.8.5-amd64.exe)<br>
-[Windows 32-bit](https://www.python.org/ftp/python/3.8.5/python-3.8.5.exe)
-- On Debian/Ubuntu:<br>
-`apt install python3 python-is-python3`
+### Step 1: First, Install [Python 3](https://www.python.org/downloads)
+Its a program that will process instructions of the Python programming language.
 
-2. Download **[replacer.py](https://github.com/rondevous/BulkReplacer/raw/master/replacer.py)**
-_(right click the link > Save link as)_
+⬇️ [Python for Windows 64-bit](https://www.python.org/ftp/python/3.8.5/python-3.8.5-amd64.exe)<br>
+⬇️ [Python for Windows 32-bit](https://www.python.org/ftp/python/3.8.5/python-3.8.5.exe)<br>
+🐧 **Debian/Ubuntu/Linux Mint:** ` apt install python-is-python3 `<br>
+🐧 **Fedora:** ` dnf install python3 `
 
-### Preparation:
-1. Export your language from [translations.telegram.org/**langname/appname**](https://translations.telegram.org)
-2. Keep all files in the same folder:
-```
-replacer.py
-android_lang.xml
-```
+### Step 2: Download the most recent copy of [replacer.py](https://cdn.jsdelivr.net/gh/rondevous/tgStringsBulkReplace/replacer.py)
+Also, make an export of your language. Put all the files in the same folder:
 
-### Running the replacer:
-1. Open [replacer.py](https://github.com/rondevous/BulkReplacer/raw/master/replacer.py) in notepad/editor and edit the `find:replace` pairs at the TOP of the code:
+MyFolder<br>
+|— [replacer.py](https://cdn.jsdelivr.net/gh/rondevous/tgStringsBulkReplace/replacer.py)<br>
+|— android_lang.xml<br>
+|— ios_language.strings<br>
+
+**Note:** Unlike .xml files of Android and Android\_X, if you want to replace <ins>untranslated strings</ins> for <ins>iOS/ TDesktop/ MacOS</ins>, export the base language and then [split the untranslated strings](https://github.com/rondevous/lang_split) from it before using with the replacer.
+
+### Step 3: Create your find-replace pairs
+Open [replacer.py](https://cdn.jsdelivr.net/gh/rondevous/tgStringsBulkReplace/replacer.py) in notepad. Edit the find-replace pairs inside the `replace_dictionary` at the **top** of the code<br>
 ```
 replace_dictionary = {
   "groups":"baskets",
@@ -53,37 +50,54 @@ replace_dictionary = {
   "Forever":"STFU",
 }
 ```
-Note that replacements are case-sensitive.<br>
-After editing, it may look something like this:
-```
-replace_dictionary = {
-  "subscribers":"सबस्ख्रायबर्झ",
-  "subscriber":"सबस्ख्रयबर",
-  "Group":"ग्रप",
-  "group":"ग्रप",
-  "channel":"चेनल",
-  "channels":"चेनल्स",
-}
-```
-2. Open folder in Command prompt / Terminal
-On Windows, in the folder's address bar, type `cmd.exe` and press Enter
-![open_folder_in_cmd](https://user-images.githubusercontent.com/67483423/91973117-4ed93d00-ed39-11ea-9eba-19f2a3cc3ece.png)
 
-On Linux, launch the terminal:<br>
+Here's what mine look like:<br>
+![Edited Pairs](https://user-images.githubusercontent.com/67483423/92223855-ae148a00-eebe-11ea-9132-dc675d4fcc28.png)<br>
+Check the syntax of the pairs:<br>
+
+`"phrase to find":"phrase to replace",`<br>
+
+Note the comma (`,`) at the end of each pair.
+
+
+### Step 4: Open folder in Command prompt / Terminal
+- **Windows**<br>
+![Open folder in cmd](https://user-images.githubusercontent.com/67483423/91973117-4ed93d00-ed39-11ea-9eba-19f2a3cc3ece.png)<br>
+On Windows, type `cmd.exe` in the folder's address bar and press Enter<br>
+
+The command prompt will open to that folder
+
+- **Linux**<br>
+![Open folder in Terminal](https://user-images.githubusercontent.com/67483423/92240500-5b48cb80-eeda-11ea-81a1-88a6ab1ed97a.png)<br>
+On Linux, some file managers have this option.
+
+If not, open terminal, and **cd** to the folder where the files are placed.
+
 `cd path/to/folder`
-If you enter `pwd`, the output should be `/complete/.../path/to/folder`
+
+Tip: you can check the "current folder" with the `pwd` command. `ls` will show what files are present in it
 
 
-3. Run the replacer with this command (do not copy `$`)
+### Step 5: Run the replacer
+![Run-the-Replacer](https://user-images.githubusercontent.com/67483423/92239337-6dc20580-eed8-11ea-8ab2-3fa0ba676c27.gif)<br>
+Type the command and press enter
 ```
-$ python replacer.py --lang android_lang.xml
+python replacer.py --lang android_lang.xml
 ```
-Tip: Pressing 'Tab' in the terminal will auto-complete the file name.
+🔸 Tip: Press `Tab` to auto-complete the filename in cmd / terminal
 
-**Hint: If you get stuck**
-```
-$ python replacer.py --help
-```
+🔸 Tip: If the same word is found with a different case (UPPERCASE, lowercase, or SomeOtherCASE), a file named `possibilities.log` will be made in the same folder.
+
+That's all. 😁 <br>
+Import your EDITED file on the [translations platform](http://translations.telegram.org)
+---
+**If you get an error**<br>
+Check what you typed. Make sure you have typed the full filename.
+
+**Please check for any grammar issues.**<br>
+When importing any file on the translations platform, it will always give you a chance to see the strings that you are going to import. 
+
+Use this opportunity to review the strings, change them if needed, and then import them 😊
 
 ## More tools and support
 Join us in the [Translation Platform Tools](https://t.me/TranslationTools) group
