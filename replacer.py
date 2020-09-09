@@ -6,8 +6,6 @@ replace_dictionary = {
 }
 # Remember: lowercase is not UPPERCASE 
 
-#!TODO: implement a non-exact replace log
-#!TODO: create an imperfect log with [\w] only ? 
 #!TODO: create an [OFFLINE-USE].xml
 #!TODO: Use folders?
 
@@ -301,13 +299,17 @@ args = arg_parser.parse_args()
 lang_file = str(args.lang)  # str('android_lang_v1234567.xml')
 print("\n\nUsing File:\n\t"+lang_file)
 
-# log possibilites
-possibilites = open("possibilites.log","w")
+# logs
+uncasedlog = open("uncased.log", 'w')
+Non_Exact_Log = open("non-exact.log", 'w')
+imperfectlog = open("imperfect.log", 'w')
 
-# Initialise Variables
-global tree, total_cased, total_uncased, skipped
-total_cased = 0
-total_uncased = 0
+# Stats Variables
+global tree, total_cased, total_imperfect, total_uncased, total_nonexact, skipped
+
+# Set to 0
+total_nonexact = total_uncased = total_imperfect = total_cased = 0
+
 skipped = list()
 match_text = 'dummy'
 replace_text = 'XXdummyXX'
@@ -344,21 +346,25 @@ def printSummary():
 	print('\t'+str(len(skipped)),'skipped/overlooked')
 	print('\t'+str(total_cased),'replaced in',(rplStrCount),'strings.')
 	if total_uncased != 0:
-		print('\t'+str(total_uncased)+' possible replacements ignored.')
-		print("(See 'possibilites.log' and add them to the dictionary)")
+		print('\t'+str(total_uncased)+' uncased replacements IGNORED.')
+		print("(See 'uncased.log' and add them to the dictionary)")
+	if total_imperfect != 0:
+		print('\t'+str(total_nonexact)+' imperfect replacements IGNORED.')
+		print("(Refer 'imperfect.log', for possibilities. It's okay to ignore this.)")
+	if total_nonexact != 0:
+		print('\t'+str(total_nonexact)+' non-exact replacements IGNORED.')
+		print("(Refer 'non-exact.log', for non-whole-word matches. It's okay to ignore this.)")
 	print("\nImport this:\n\t"+edited_file_name)
 	print("\nPlease double check when importing.\n")
 	#
 
 # Algo for XML replacer
 if(isXML()):
-	global tree
 	# tree = ET.parse(lang_file)
+	global tree
 	root = tree.getroot()	# <Element 'resources'>
-	#
 	if(args.p):
 		print('\n\nThese strings have been edited:\n')
-	#
 	strCount = 1
 	rplStrCount = 0
 	for string in root.findall('string'):
@@ -367,27 +373,39 @@ if(isXML()):
 			strCount += 1
 			skipped.append(string_name)
 			continue
-		translation = str(string.text)
-		exact_subn = 0
-		uncased_subn = 0
+		current_string = str(string.text)
+		# Reset to 0
+		non_exact_subn = uncased_subn = imperfect_subn = exact_subn = 0
 		for key in keylist:
-			if key is keylist[0]:
-				translation = (translation,0)
+			if key is keylist[0]: # Reset string
+				imperfect_tr = non_exact_tr = uncased_tr = translation = (current_string, 0)
 			match_text = str(key)
 			replace_text = str(replace_dictionary[key])
-			# To learn about the regex used below, type in the Python Console: 	help('re')
+			# Replacements
 			translation = re.subn(r'(?<![\w'+alphabets+r'])'+match_text+r'(?![\w'+alphabets+r'])', replace_text, translation[0], flags=re.U)
-			uncased_translation = re.subn(r'(?<![\w'+alphabets+r'])'+match_text+r'(?![\w'+alphabets+r'])', 'UNCASED', translation[0], flags=re.U+re.I) # Use re.DOTALL & re.MULTILINE? #  flags=re.U|S|I|M
-			
-			uncased_subn += uncased_translation[1]
+			imperfect_tr = re.subn(r'(?<![\w])'+match_text+r'(?![\w])', replace_text, imperfect_tr[0], flags=re.U) # old replacer
+			uncased_tr = re.subn(r'(?<![\w'+alphabets+r'])'+match_text+r'(?![\w'+alphabets+r'])', 'UNCASED', uncased_tr[0], flags=re.U+re.I) # Use re.DOTALL & re.MULTILINE? #  flags=re.U|S|I|M
+			non_exact_tr = re.subn(match_text, replace_text, non_exact_tr[0], flags=re.U)
+			# Current Stats
 			exact_subn += translation[1]
-		#end looping replacements
+			imperfect_subn += imperfect_tr[1]
+			uncased_subn += uncased_tr[1]
+			non_exact_subn += non_exact_tr[1]
+		# End replacements for this string
 		#
-		# Useful info
+		# Total Stats
 		total_cased += exact_subn
+		if(imperfect_subn - exact_subn > 0): #!TODO: make an xml instead?
+			total_imperfect += imperfect_subn
+			imperfectlog.write(str(imperfect_tr[0])+'\n') # Log imperfect replacements
+		#
 		if(uncased_subn - exact_subn > 0):
 			total_uncased += uncased_subn - exact_subn
-			possibilites.write(str(translation[0])+'\n') # Log
+			uncasedlog.write(str(translation[0])+'\n') # Log uncased
+		#
+		if(non_exact_subn - exact_subn > 0):
+			total_nonexact += non_exact_subn - exact_subn
+			Non_Exact_Log.write(str(non_exact_tr[0])+'\n') # Log non-exact matches
 		#
 		if(exact_subn == 0):
 			strCount += 1
@@ -400,52 +418,70 @@ if(isXML()):
 		rplStrCount += 1
 		strCount += 1
 	#end replacing strings
-	possibilites.close()
+	imperfectlog.close()
+	uncasedlog.close()
+	Non_Exact_Log.close()
 	#
 	edited_file_name = str(re.sub(r'(android_x|android)_(.*)[_.].*xml', r'\1_\2_[IMPORT-READY].xml', lang_file))
 	tree.write(edited_file_name, xml_declaration=True, encoding='Unicode')
 	#
 	printSummary()
+	# Cleanup Memory
+	re.purge()
 	del root, tree, ET # xml memory cleanup
 	#
 # Algo for .strings replacer
 elif(isStrings()):
 	global dot_strings
-	# open file, copy all data, iterate and write out to a new file
+	# open file -> copy all data -> iterate -> write out new file
 	dot_strings = open(lang_file, 'r').read()
 	edited_file_name = re.sub(r'(tdesktop|macos|ios)_(.*)[_.].*strings', r'\1_\2_[IMPORT-READY].strings', lang_file)
 	new_strings = open(edited_file_name, 'w', encoding='UTF-8')
 	#
 	if(args.p):
-		print('\n\nThese strings have been edited:\n')
+		print('\n\nThese strings have been replaced:\n')
 	#
 	strCount = 0
 	rplStrCount = 0
 	for match in re.finditer(r'(?<!.)"(.*)"\s=\s"(.*)";\n', dot_strings):
 		strName = match.groups()[0]
 		strValue = match.groups()[1]
-		translation = strValue
-		exact_subn = 0
-		uncased_subn = 0
+		current_string = str(string.text)
+		# Reset to 0
+		non_exact_subn = uncased_subn = imperfect_subn = exact_subn = 0
 		for key in keylist:
 			if key is keylist[0]:
-				translation = (translation,0)
+				imperfect_tr = non_exact_tr = uncased_tr = translation = (current_string, 0)
 			match_text = str(key)
 			replace_text = str(replace_dictionary[key])
-			# To learn about the regex used below, type in the Python Console: 	help('re')
+			# Replacements
 			translation = re.subn(r'(?<![\w'+alphabets+r'])'+match_text+r'(?![\w'+alphabets+r'])', replace_text, translation[0], flags=re.U)
-			uncased_translation = re.subn(r'(?<![\w'+alphabets+r'])'+match_text+r'(?![\w'+alphabets+r'])', 'UNCASED', translation[0], flags =re.U+re.I) # Use re.DOTALL & re.MULTILINE? #  flags = re.U|S|I|M
-			uncased_subn += uncased_translation[1]
+			imperfect_tr = re.subn(r'(?<![\w])'+match_text+r'(?![\w])', replace_text, imperfect_tr[0], flags=re.U) # old replacer
+			uncased_tr = re.subn(r'(?<![\w'+alphabets+r'])'+match_text+r'(?![\w'+alphabets+r'])', 'UNCASED', uncased_tr[0], flags=re.U+re.I) # Use re.DOTALL & re.MULTILINE? #  flags=re.U|S|I|M
+			non_exact_tr = re.subn(match_text, replace_text, non_exact_tr[0], flags=re.U)
+			# Current Stats
 			exact_subn += translation[1]
-		#end looping replacements
+			imperfect_subn += imperfect_tr[1]
+			uncased_subn += uncased_tr[1]
+			non_exact_subn += non_exact_tr[1]
+		# End replacements for this string
 		#
-		# Useful info
+		# Totals Stats
 		total_cased += exact_subn
+		if(imperfect_subn - exact_subn > 0): #!TODO: make an xml instead?
+			total_imperfect += imperfect_subn
+			imperfectlog.write(str(imperfect_tr[0])+'\n') # Log imperfect replacements
+		#
 		if(uncased_subn - exact_subn > 0):
 			total_uncased += uncased_subn - exact_subn
-			possibilites.write(str(translation[0])+'\n') # Log
+			uncasedlog.write(str(translation[0])+'\n') # Log uncased
+		#
+		if(non_exact_subn - exact_subn > 0):
+			total_nonexact += non_exact_subn - exact_subn
+			Non_Exact_Log.write(str(non_exact_tr[0])+'\n') # Log non-exact matches
 		#
 		if(exact_subn == 0):
+			# remove string
 			dot_strings = re.sub(match, '', dot_strings, re.U+re.M)
 			strCount += 1
 			continue
@@ -459,6 +495,11 @@ elif(isStrings()):
 		if(args.p):
 			print('\n'+str(strCount)+'. '+strValue+'')
 		strCount += 1
+	#end replacing strings
+	imperfectlog.close()
+	uncasedlog.close()
+	Non_Exact_Log.close()
+	#
 	new_strings.close()
 	#
 	printSummary()
@@ -466,8 +507,8 @@ elif(isStrings()):
 	re.purge()
 	del dot_strings, strCount, new_strings, isStrings
 	#
-else: # if not either types of file
-	print("\nERROR: '"+lang_file+"' is neither an XML nor a proper .strings file.")
+else: # if neither types of file
+	print("\nERROR: '"+lang_file+"' is neither an .XML nor a .strings file.")
 	print("\nPlease export a translation file from your language")
 	print('How to export --> https://t.me/TranslationsTalk/1759)\n') #FIXME
 
