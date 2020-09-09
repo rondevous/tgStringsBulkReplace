@@ -1,5 +1,5 @@
 # EDIT THIS
-replace_dictionary = {
+REPLACE_DICTIONARY = {
 	"groups":"baskets",
 	"members":"onions",
 	"Forever":"STFU",
@@ -7,11 +7,11 @@ replace_dictionary = {
 # Remember: lowercase is not UPPERCASE 
 
 #!TODO: create an [OFFLINE-USE].xml
-#!TODO: Use folders?
+#!TODO: Save inside folders?
 
 # DO NOT EDIT THE CODE BELOW (unless you know Python and RegEx)
 
-keylist = list(replace_dictionary)
+KEYLIST = list(REPLACE_DICTIONARY)
 # Imports
 import xml.etree.ElementTree as ET
 import re
@@ -279,8 +279,8 @@ class Unicode_Range:
 		return temp
 # end of class
 
-ur = Unicode_Range
-alphabets = ur.all(ur)
+UR = Unicode_Range
+ALPHABETS = UR.all(UR)
 
 # Command-line info and argument parsing
 arg_parser = argparse.ArgumentParser(
@@ -296,7 +296,7 @@ arg_parser.add_argument(
 	help='Display the replaced translations.')
 
 args = arg_parser.parse_args()
-lang_file = str(args.lang)  # str('android_lang_v1234567.xml')
+lang_file = str(args.lang)  # 'android_lang_v1234567.xml'
 print("\n\nUsing File:\n\t"+lang_file)
 
 # logs
@@ -304,15 +304,15 @@ uncasedlog = open("uncased.log", 'w')
 Non_Exact_Log = open("non-exact.log", 'w')
 imperfectlog = open("imperfect.log", 'w')
 
-# Stats Variables
-global tree, total_cased, total_imperfect, total_uncased, total_nonexact, skipped
+# Variables
+global tree, dot_strings, total_cased, total_imperfect, total_uncased, total_nonexact, skipped
 
 # Set to 0
 total_nonexact = total_uncased = total_imperfect = total_cased = 0
 
 skipped = list()
-match_text = 'dummy'
-replace_text = 'XXdummyXX'
+# match_text = 'dummy'
+# replace_text = 'XXdummyXX'
 
 # Checks if lang_file is in XML format
 def isXML():
@@ -336,25 +336,66 @@ def isStrings ():
 	result = (len(re.findall(r'".*"\s=\s".*";', dot_strings)) > 0)
 	return result
 
+class Loop_Replacements:
+	def replace(self, tr_string):
+		# global REPLACE_DICTIONARY, KEYLIST, ALPHABETS
+		global total_cased, total_imperfect, total_uncased, total_nonexact
+		# Reset stats & strings
+		self.non_exact_now = self.uncased_now = self.imperfect_now = self.exact_now = 0
+		self.imperfect_tr = self.non_exact_tr = self.uncased_tr = self.translation = (tr_string, 0)
+		for key in KEYLIST:
+			match_text = str(key)
+			replace_text = str(REPLACE_DICTIONARY[key])
+			# Replacements
+			self.translation = re.subn(r'(?<![\w'+ALPHABETS+r'])'+match_text+r'(?![\w'+ALPHABETS+r'])', replace_text, self.translation[0], flags=re.U)
+			self.imperfect_tr = re.subn(r'(?<![\w])'+match_text+r'(?![\w])', replace_text, self.imperfect_tr[0], flags=re.U) # old replacer
+			self.uncased_tr = re.subn(r'(?<![\w'+ALPHABETS+r'])'+match_text+r'(?![\w'+ALPHABETS+r'])', 'UNCASED', self.uncased_tr[0], flags=re.U+re.I) # Use re.DOTALL & re.MULTILINE? #  flags=re.U|S|I|M
+			self.non_exact_tr = re.subn(match_text, replace_text, self.non_exact_tr[0], flags=re.U)
+			# Current Stats
+			self.exact_now += self.translation[1]
+			self.imperfect_now += self.imperfect_tr[1]
+			self.uncased_now += self.uncased_tr[1]
+			self.non_exact_now += self.non_exact_tr[1]
+		# End replacements for this string
+		# Total Stats and Logs
+		total_cased += self.exact_now
+		temp = self.imperfect_now - self.exact_now
+		if(temp > 0): #!TODO: make an xml instead?
+			total_imperfect += temp
+			imperfectlog.write(str(self.imperfect_tr[0])+'\n') # Log imperfect replacements
+		#
+		temp = self.uncased_now - self.exact_now
+		if(temp > 0):
+			total_uncased += temp
+			uncasedlog.write(str(self.translation[0])+'\n') # Log uncased
+		#
+		temp = self.non_exact_now - self.exact_now
+		if(temp > 0):
+			total_nonexact += temp
+			Non_Exact_Log.write(str(self.non_exact_tr[0])+'\n') # Log non-exact replacements
+		#
+	#
+
 # Prints summary
 def printSummary():
 	print('\nSkipped:')
 	for i in range(0, len(skipped)):
 		print('\t<'+skipped[i]+'>')
 	#
-	print('\nSummary:')
+	print("\nLOGS:")
+	if total_imperfect != 0:
+		print('\t'+str(total_imperfect)+' imperfect replacements found')
+		print("\t(Refer 'imperfect.log', for possible replacements)")
+	if total_nonexact != 0:
+		print('\n\t'+str(total_nonexact)+' non-exact replacements found')
+		print("\t(Refer 'non-exact.log', for non-whole-word replacements)")
+	print('\nSUMMARY:')
 	print('\t'+str(len(skipped)),'skipped/overlooked')
 	print('\t'+str(total_cased),'replaced in',(rplStrCount),'strings.')
 	if total_uncased != 0:
-		print('\t'+str(total_uncased)+' uncased replacements IGNORED.')
+		print('\t'+str(total_uncased)+' uncased replacements found')
 		print("(See 'uncased.log' and add them to the dictionary)")
-	if total_imperfect != 0:
-		print('\t'+str(total_nonexact)+' imperfect replacements IGNORED.')
-		print("(Refer 'imperfect.log', for possibilities. It's okay to ignore this.)")
-	if total_nonexact != 0:
-		print('\t'+str(total_nonexact)+' non-exact replacements IGNORED.')
-		print("(Refer 'non-exact.log', for non-whole-word matches. It's okay to ignore this.)")
-	print("\nImport this:\n\t"+edited_file_name)
+	print("\nImport File:\n\t"+edited_file_name)
 	print("\nPlease double check when importing.\n")
 	#
 
@@ -367,6 +408,7 @@ if(isXML()):
 		print('\n\nThese strings have been edited:\n')
 	strCount = 1
 	rplStrCount = 0
+	LR = Loop_Replacements
 	for string in root.findall('string'):
 		string_name = string.get('name')
 		if(string_name == 'language_code' or string_name == 'LanguageCode'): # skip
@@ -374,50 +416,21 @@ if(isXML()):
 			skipped.append(string_name)
 			continue
 		current_string = str(string.text)
-		# Reset to 0
-		non_exact_subn = uncased_subn = imperfect_subn = exact_subn = 0
-		for key in keylist:
-			if key is keylist[0]: # Reset string
-				imperfect_tr = non_exact_tr = uncased_tr = translation = (current_string, 0)
-			match_text = str(key)
-			replace_text = str(replace_dictionary[key])
-			# Replacements
-			translation = re.subn(r'(?<![\w'+alphabets+r'])'+match_text+r'(?![\w'+alphabets+r'])', replace_text, translation[0], flags=re.U)
-			imperfect_tr = re.subn(r'(?<![\w])'+match_text+r'(?![\w])', replace_text, imperfect_tr[0], flags=re.U) # old replacer
-			uncased_tr = re.subn(r'(?<![\w'+alphabets+r'])'+match_text+r'(?![\w'+alphabets+r'])', 'UNCASED', uncased_tr[0], flags=re.U+re.I) # Use re.DOTALL & re.MULTILINE? #  flags=re.U|S|I|M
-			non_exact_tr = re.subn(match_text, replace_text, non_exact_tr[0], flags=re.U)
-			# Current Stats
-			exact_subn += translation[1]
-			imperfect_subn += imperfect_tr[1]
-			uncased_subn += uncased_tr[1]
-			non_exact_subn += non_exact_tr[1]
-		# End replacements for this string
 		#
-		# Total Stats
-		total_cased += exact_subn
-		if(imperfect_subn - exact_subn > 0): #!TODO: make an xml instead?
-			total_imperfect += imperfect_subn
-			imperfectlog.write(str(imperfect_tr[0])+'\n') # Log imperfect replacements
+		LR.replace(LR, current_string)
 		#
-		if(uncased_subn - exact_subn > 0):
-			total_uncased += uncased_subn - exact_subn
-			uncasedlog.write(str(translation[0])+'\n') # Log uncased
-		#
-		if(non_exact_subn - exact_subn > 0):
-			total_nonexact += non_exact_subn - exact_subn
-			Non_Exact_Log.write(str(non_exact_tr[0])+'\n') # Log non-exact matches
-		#
-		if(exact_subn == 0):
+		if(LR().exact_now == 0):
 			strCount += 1
 			root.remove(string)
 			continue
-		if(args.p):
+		elif(args.p):
 			# print('\n'+str(strCount)+'. '+string_name+'')
-			print(str(strCount)+".", translation[0])
-		string.text = translation[0]
+			print(f"[{strCount}]", LR().translation[0])
+		string.text = LR().translation[0]
 		rplStrCount += 1
 		strCount += 1
 	#end replacing strings
+	print('type of LR:', type(LR()))
 	imperfectlog.close()
 	uncasedlog.close()
 	Non_Exact_Log.close()
@@ -434,61 +447,33 @@ if(isXML()):
 elif(isStrings()):
 	global dot_strings
 	# open file -> copy all data -> iterate -> write out new file
-	dot_strings = open(lang_file, 'r').read()
+	# dot_strings = open(lang_file, 'r').read()
 	edited_file_name = re.sub(r'(tdesktop|macos|ios)_(.*)[_.].*strings', r'\1_\2_[IMPORT-READY].strings', lang_file)
 	new_strings = open(edited_file_name, 'w', encoding='UTF-8')
 	#
 	if(args.p):
 		print('\n\nThese strings have been replaced:\n')
 	#
-	strCount = 0
+	strCount = 1
 	rplStrCount = 0
+	LR = Loop_Replacements
 	for match in re.finditer(r'(?<!.)"(.*)"\s=\s"(.*)";\n', dot_strings):
 		strName = match.groups()[0]
 		strValue = match.groups()[1]
 		current_string = str(string.text)
-		# Reset to 0
-		non_exact_subn = uncased_subn = imperfect_subn = exact_subn = 0
-		for key in keylist:
-			if key is keylist[0]:
-				imperfect_tr = non_exact_tr = uncased_tr = translation = (current_string, 0)
-			match_text = str(key)
-			replace_text = str(replace_dictionary[key])
-			# Replacements
-			translation = re.subn(r'(?<![\w'+alphabets+r'])'+match_text+r'(?![\w'+alphabets+r'])', replace_text, translation[0], flags=re.U)
-			imperfect_tr = re.subn(r'(?<![\w])'+match_text+r'(?![\w])', replace_text, imperfect_tr[0], flags=re.U) # old replacer
-			uncased_tr = re.subn(r'(?<![\w'+alphabets+r'])'+match_text+r'(?![\w'+alphabets+r'])', 'UNCASED', uncased_tr[0], flags=re.U+re.I) # Use re.DOTALL & re.MULTILINE? #  flags=re.U|S|I|M
-			non_exact_tr = re.subn(match_text, replace_text, non_exact_tr[0], flags=re.U)
-			# Current Stats
-			exact_subn += translation[1]
-			imperfect_subn += imperfect_tr[1]
-			uncased_subn += uncased_tr[1]
-			non_exact_subn += non_exact_tr[1]
-		# End replacements for this string
 		#
-		# Totals Stats
-		total_cased += exact_subn
-		if(imperfect_subn - exact_subn > 0): #!TODO: make an xml instead?
-			total_imperfect += imperfect_subn
-			imperfectlog.write(str(imperfect_tr[0])+'\n') # Log imperfect replacements
+		LR.replace(LR, current_string)
 		#
-		if(uncased_subn - exact_subn > 0):
-			total_uncased += uncased_subn - exact_subn
-			uncasedlog.write(str(translation[0])+'\n') # Log uncased
-		#
-		if(non_exact_subn - exact_subn > 0):
-			total_nonexact += non_exact_subn - exact_subn
-			Non_Exact_Log.write(str(non_exact_tr[0])+'\n') # Log non-exact matches
-		#
-		if(exact_subn == 0):
+		if(LR().exact_now == 0):
 			# remove string
 			dot_strings = re.sub(match, '', dot_strings, re.U+re.M)
 			strCount += 1
 			continue
 		if(args.p):
 			# print('\n'+str(strCount)+'. '+string_name+'')
-			print(str(strCount)+".", translation[0])
-		match.groups()[1] = strValue = translation[0]
+			print(f"[{strCount}]", LR().translation[0])
+		# match.groups()[1] = strValue = LR().translation[0]
+		strValue = LR().translation[0]
 		#
 		new_strings.write("\""+strName+"\" = \""+strValue+"\";\n")
 		rplStrCount += 1
