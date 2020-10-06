@@ -1,19 +1,19 @@
 # Bulk Replacer
-Rename strings of your Telegram langpack in bulk. All translation apps are supported. Unicode character-range is supported. You can replace latin and non-latin characters as well.
+Rename multiple strings of your Telegram langpack at once! All of telegram's apps on the [translation panel](https://translations.telegram.org) are supported.
 
-The words are replaced across all languages and scripts in the Unicode character set. That includes English, Russian, Hindi, Malayalam, Japanese, etc.
+You can replace words/phrases of any language script in the Unicode character set. That includes English, Russian, Hindi, Malayalam, Japanese, etc.
 
-**Note:** This is still an early stage. There are plans to make it user-friendly in the coming months. But since, you may not have the patience to wait, you may use it in the terminal.
+**Note:** This is still in an early stage. There are plans to make it user-friendly in the coming months. But you may not have the patience to wait, so you may use this in the terminal...
 
 ## Pros:
-- Replaces the whole word (only exact matches)
+- Replaces the whole word in any language (only exact matches)
 - **Works offline**
-- Finishes in under 2 secs
+- Completes in few seconds
 - **Replacements for the word "admin", will not affect the word "administrator".**
 - Likewise, replacements for the word "use" will not affect the word "house".
 
 ## Cons:
-- **Find-Replace pairs have to be made inside the code.**
+- **Find-Replace pairs need to be made inside the code file.**
 - Need to use the Terminal/Command Prompt
 - **Need to install something (Python 3)**
 - Translator has to adjust with the code-y eyes.
@@ -31,18 +31,18 @@ Its a program that will process instructions of the Python programming language.
 🐧 **Debian/Ubuntu/Linux Mint:** ` apt install python-is-python3 `<br>
 🐧 **Fedora:** ` dnf install python3 `
 
-### Step 2: Download the most recent copy of [replacer.py](https://cdn.jsdelivr.net/gh/rondevous/tgStringsBulkReplace/replacer.py)
+### Step 2: Download the most recent copy of [replacer.py](https://cdn.jsdelivr.net/gh/rondevous/BulkReplacer/dev/replacer.py)
 Also, make an export of your language. Put all the files in the same folder:
 
 MyFolder<br>
-|— [replacer.py](https://cdn.jsdelivr.net/gh/rondevous/tgStringsBulkReplace/replacer.py)<br>
+|— [replacer.py](https://cdn.jsdelivr.net/gh/rondevous/BulkReplacer/replacer.py)<br>
 |— android_lang.xml<br>
 |— ios_language.strings<br>
 
 **Note:** Unlike .xml files of Android and Android\_X, if you want to replace <ins>untranslated strings</ins> for <ins>iOS/ TDesktop/ MacOS</ins>, export the base language and then [split the untranslated strings](https://github.com/rondevous/lang_split) from it before using with the replacer.
 
 ### Step 3: Create your find-replace pairs
-Open [replacer.py](https://cdn.jsdelivr.net/gh/rondevous/tgStringsBulkReplace/replacer.py) in notepad. Edit the find-replace pairs inside the `replace_dictionary` at the **top** of the code<br>
+Open [replacer.py](https://cdn.jsdelivr.net/gh/rondevous/BulkReplacer/replacer.py) in notepad. Edit the find-replace pairs inside the `replace_dictionary` at the **top** of the code<br>
 ```
 replace_dictionary = {
   "groups":"baskets",
@@ -89,7 +89,7 @@ python replacer.py --lang android_lang.xml
 🔸 Tip: If the same word is found with a different case (UPPERCASE, lowercase, or SomeOtherCASE), a file named `possibilities.log` will be made in the same folder.
 
 That's all. 😁 <br>
-Import your EDITED file on the [translations platform](http://translations.telegram.org)
+Import your EDITED file on the [translations platform](https://translations.telegram.org)
 ---
 **If you get an error**<br>
 Check what you typed. Make sure you have typed the full filename.
